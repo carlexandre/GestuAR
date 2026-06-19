@@ -120,7 +120,7 @@ for nome in ["svc","RandomForest","Rede Neural Artificial","KNN"]:
         estimator=pipeline,
         param_grid=param_grid,
         cv=cv,
-        scoring="accuracy",
+        scoring="f1_macro",
         n_jobs=-1,
         verbose=3
     )
