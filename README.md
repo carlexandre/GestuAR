@@ -69,7 +69,6 @@ GestuAR/
 │   └── 4_treinar_cnn.py           # Treina a CNN com MobileNetV2
 │
 ├── analise/                       # Visualizações e comparativos
-│   ├── comparar_modelos.py        # Dashboard HTML comparando todas as abordagens
 │   └── metricas_cnn.py            # Gráficos detalhados da CNN
 │
 ├── app/                           # Inferência em tempo real
