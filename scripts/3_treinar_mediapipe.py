@@ -6,6 +6,8 @@ import time
 from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler, LabelEncoder
+from sklearn.linear_model import LogisticRegression
+from sklearn.calibration import CalibratedClassifierCV
 from sklearn.model_selection import train_test_split
 
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
@@ -33,7 +35,7 @@ def normalizar_pelo_pulso(X):
 
     return np.array(X_norm, dtype=np.float32)
 dataframes = []
-for arquivo in Path("../data/landmarks").glob("*.csv"):
+for arquivo in Path("data/landmarks").glob("*.csv"):
     classe = arquivo.stem
     df = pd.read_csv(arquivo, header=None)
     if df.shape[1] < 63:
@@ -43,7 +45,7 @@ for arquivo in Path("../data/landmarks").glob("*.csv"):
     df["origem"] = "dataset1"
     dataframes.append(df)
 
-for arquivo in Path("../data/landmarks_imagem").glob("*.csv"):
+for arquivo in Path("data/landmarks_imagem").glob("*.csv"):
     classe = arquivo.stem
     df = pd.read_csv(arquivo, header=None)
     if df.shape[1] < 63:
@@ -52,7 +54,7 @@ for arquivo in Path("../data/landmarks_imagem").glob("*.csv"):
     df["origem"] = "dataset2"
     dataframes.append(df)
 teste = []
-for arquivo in Path("../data/landmarks_teste").glob("*.csv"):
+for arquivo in Path("data/landmarks_teste").glob("*.csv"):
     classe = arquivo.stem
     df = pd.read_csv(arquivo, header=None)
     if df.shape[1] < 63:
@@ -93,13 +95,22 @@ def metricas(m):
     f1 = f1_score(y_teste, y_pred, average='macro')
     matriz = confusion_matrix(y_teste, y_pred)
     return [f1,acc,prec,rec,matriz]
-best_params = joblib.load("../models/hiperparametros.pkl")
+best_params = joblib.load("models/mediapipe/hiperparametros.pkl")
+
+C     = best_params["svc"]["svm__C"]
+gamma = best_params["svc"]["svm__gamma"]
 
 estimadores = {
     "svc": SVC(kernel="rbf",probability=True),
+    "svc_calibrado": CalibratedClassifierCV(
+        SVC(kernel="rbf", C=C, gamma=gamma),
+        method="isotonic",  # usa cross-entropy internamente
+        cv=5
+    ),
     "RandomForest": RandomForestClassifier(random_state=42,n_jobs=-1),
     "Rede Neural Artificial": MLPClassifier(solver='adam',max_iter=1000, random_state=42),
-    "KNN": KNeighborsClassifier()
+    "KNN": KNeighborsClassifier(),
+    "Regressão Logística": LogisticRegression(max_iter=1000, random_state=42, n_jobs=-1)
 }
 modelos = []
 metricas_modelos = []
@@ -113,11 +124,15 @@ for nome, estimador in estimadores.items():
         ('scaler', StandardScaler()),
         ('model', estimador)
     ])
-    params = {}
-    for k,v in best_params[nome].items():
-        novo_nome = k.split("__")[1]
-        params[f"model__{novo_nome}"] = v
-    pipeline.set_params(**params)
+
+    # svc_calibrado já tem os params definidos no estimador, pula o set_params
+    if nome != "svc_calibrado":
+        params = {}
+        for k, v in best_params[nome].items():
+            novo_nome = k.split("__")[1]
+            params[f"model__{novo_nome}"] = v
+        pipeline.set_params(**params)
+
     inicio = time.perf_counter()
     pipeline.fit(x_treino, y_treino)
     fim = time.perf_counter()
@@ -136,5 +151,8 @@ melhor_modelo = max(modelos, key=lambda x: x[1])
 nome = melhor_modelo[0]
 modelo_final = melhor_modelo[2]
 print(f"\nMelhor modelo: {nome}")
-joblib.dump( modelo_final,"../models/modelo_libras.pkl")
-joblib.dump(metricas_modelos, "../models/metricas_modelos.pkl")
+
+
+joblib.dump( modelo_final,"models/mediapipe/modelo_libras.pkl")
+joblib.dump(metricas_modelos, "models/mediapipe/metricas_modelos.pkl")
+joblib.dump(le, "models/mediapipe/label_encoder.pkl")

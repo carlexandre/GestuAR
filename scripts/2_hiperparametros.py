@@ -3,6 +3,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler, LabelEncoder
@@ -32,7 +33,7 @@ def normalizar_pelo_pulso(X):
 
     return np.array(X_norm)
 dataframes = []
-for arquivo in Path("../data/landmarks").glob("*.csv"):
+for arquivo in Path("data/landmarks").glob("*.csv"):
     classe = arquivo.stem
     df = pd.read_csv(arquivo, header=None)
     if df.shape[1] < 63:
@@ -41,7 +42,7 @@ for arquivo in Path("../data/landmarks").glob("*.csv"):
     df["origem"] = "dataset1"
     dataframes.append(df)
 
-for arquivo in Path("../data/landmarks_imagem").glob("*.csv"):
+for arquivo in Path("data/landmarks_imagem").glob("*.csv"):
     classe = arquivo.stem
     df = pd.read_csv(arquivo, header=None)
     if df.shape[1] < 63:
@@ -93,6 +94,16 @@ def nomes_modelos(nome):
             "mlp__activation": ['relu'],
             "mlp__learning_rate": ['constant','adaptive']
         }
+    elif nome == "Regressão Logística":
+        pipeline = Pipeline([
+            ('imputer', SimpleImputer(strategy='median')),
+            ('scaler', StandardScaler()),
+            ('lr', LogisticRegression(max_iter=1000, random_state=42, n_jobs=-1))
+        ])
+        param_grid = {
+            'lr__C':       [0.1, 1, 10, 100],
+            'lr__solver':  ['lbfgs', 'saga'],
+        }
     else:
         pipeline = Pipeline([
             ('imputer', SimpleImputer(strategy='median')),
@@ -113,7 +124,7 @@ cv = StratifiedKFold(
     random_state=42
 )
 best_params = {}
-for nome in ["svc","RandomForest","Rede Neural Artificial","KNN"]:
+for nome in ["svc","RandomForest","Rede Neural Artificial","KNN","Regressão Logística"]:
     print(f"\nBuscando hiperparâmetros de {nome}")
     pipeline, param_grid = nomes_modelos(nome)
     grid = GridSearchCV(
@@ -128,5 +139,5 @@ for nome in ["svc","RandomForest","Rede Neural Artificial","KNN"]:
     best_params[nome] = grid.best_params_
     print(grid.best_params_)
 
-joblib.dump(best_params, "../models/mediapipe/hiperparametros.pkl")
-joblib.dump(le, "../models/mediapipe/label_encoder.pkl")
+joblib.dump(best_params, "models/mediapipe/hiperparametros.pkl")
+joblib.dump(le, "models/mediapipe/label_encoder.pkl")

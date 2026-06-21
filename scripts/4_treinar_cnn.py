@@ -29,8 +29,8 @@ from sklearn.preprocessing import LabelEncoder
 # ---------------------------------------------
 # CONFIGURAÇÕES
 # ---------------------------------------------
-INPUT_DIR   = Path("../data/dataset_imagens")  # pasta raiz com subpastas por classe
-OUTPUT_DIR  = Path("../models/cnn/modelo_cnn")
+INPUT_DIR   = Path("data/dataset_imagens")  # pasta raiz com subpastas por classe
+OUTPUT_DIR  = Path("models/cnn/modelo_cnn")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 IMG_SIZE    = (224, 224)   # resolução esperada pelo MobileNetV2

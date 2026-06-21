@@ -10,7 +10,8 @@ modelo = joblib.load("models/mediapipe/modelo_libras.pkl")
 le = joblib.load("models/mediapipe/label_encoder.pkl")
 
 # For webcam input:
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture("http://192.168.0.2:8080/video")
+#cap = cv2.VideoCapture(0)
 with mp_hands.Hands(
     model_complexity=0,
     min_detection_confidence=0.5,
