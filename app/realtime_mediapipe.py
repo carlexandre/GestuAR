@@ -6,8 +6,8 @@ import numpy as np
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
 mp_hands = mp.solutions.hands
-modelo = joblib.load("../models/mediapipe/modelo_libras.pkl")
-le = joblib.load("../models/mediapipe/label_encoder.pkl")
+modelo = joblib.load("models/mediapipe/modelo_libras.pkl")
+le = joblib.load("models/mediapipe/label_encoder.pkl")
 
 # For webcam input:
 cap = cv2.VideoCapture(0)

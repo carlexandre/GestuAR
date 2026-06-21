@@ -13,8 +13,8 @@ import tensorflow as tf
 CAMERA_SOURCE = "http://192.168.0.2:8080/video"   # ← sua IP Cam
 # CAMERA_SOURCE = 0                                # ← webcam local
 
-MODEL_PATH   = "Trabalho_Final_ama/modelo_cnn/modelo_cnn.keras"
-CLASSES_PATH = "Trabalho_Final_ama/modelo_cnn/classes.json"
+MODEL_PATH   = "models/cnn/230_amostras/modelo_cnn.keras"
+CLASSES_PATH = "models/cnn/230_amostras/classes.json"
 IMG_SIZE     = (224, 224)
 CONF_LIMIAR  = 0.4    # exibir predição só se confiança ≥ 40%
 SMOOTH_N     = 5       # média móvel sobre N frames para suavizar
