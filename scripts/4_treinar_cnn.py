@@ -105,14 +105,6 @@ def load_image(path: Path) -> np.ndarray:
 
 
 class LibrasDataset(keras.utils.Sequence):
-    """Dataset Keras que carrega imagens sob demanda (memory-efficient).
-
-    `path_indices` são índices no array global `paths` (para carregar a imagem).
-    `labels`       são os rótulos já alinhados a esses índices (mesmo tamanho).
-    Internamente mantemos `order` — posições locais de 0..N-1 — que são
-    embaralhadas a cada época; isso evita o IndexError de usar índices globais
-    para acessar o array de labels local.
-    """
 
     def __init__(self, path_indices, labels, paths, augment=False, batch_size=BATCH_SIZE):
         self.path_indices = np.array(path_indices)   # índices globais → paths[]
